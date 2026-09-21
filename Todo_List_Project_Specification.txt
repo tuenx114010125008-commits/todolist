@@ -1,0 +1,347 @@
+TODO LIST WEB APP — PROJECT SPECIFICATION
+
+1. MỤC TIÊU
+Xây dựng Todo List Web App frontend-only bằng React, cho phép người dùng quản lý Todo theo ngày, duy trì Streak, nhận Gem và sử dụng Gem để Recover Streak.
+
+2. CÔNG NGHỆ
+- React
+- Vite
+- JavaScript ES6+
+- HTML5
+- CSS3
+- React Router
+- localStorage
+- VS Code
+- Git / GitHub
+- Deploy: Vercel hoặc GitHub Pages
+
+3. KHÔNG SỬ DỤNG
+- Backend
+- Database
+- Firebase
+- API
+- Tailwind
+- TypeScript
+- Redux
+- Auth0
+- Email authentication
+
+Authentication chỉ là simulated authentication (xác thực giả lập) bằng localStorage.
+
+4. HỆ THỐNG TÀI KHOẢN
+Mỗi người dùng có tài khoản riêng. Todo, Streak và Gem được tách theo userId.
+
+5. SIGN UP
+Thông tin:
+- Username
+- Email
+- Password
+- Confirm Password
+- Security Question
+- Security Answer
+
+Validation:
+- Không bỏ trống.
+- Email hợp lệ.
+- Password đủ độ dài.
+- Confirm Password trùng.
+- Email/username không trùng.
+- Có câu trả lời bảo mật.
+
+6. LOGIN
+- Email
+- Password
+- Remember Me
+- Login
+- Forgot Password
+- Link Sign Up
+
+Remember Me:
+- Bật: ghi nhớ đăng nhập sau khi đóng/mở lại trình duyệt.
+- Tắt: chỉ giữ phiên hiện tại.
+- Có thể dùng localStorage cho Remember Me và sessionStorage cho phiên không ghi nhớ.
+
+7. FORGOT PASSWORD
+Flow:
+Login
+-> Forgot Password
+-> Nhập Email
+-> Security Question
+-> Nhập Answer
+-> Đúng
+-> Reset Password
+-> Login
+
+Không dùng email thật, OTP hoặc dịch vụ authentication.
+
+8. TODO MANAGEMENT
+Chức năng:
+- Add Todo
+- Edit Todo
+- Delete Todo
+- Complete / Uncomplete Todo
+
+Mỗi Todo có:
+- id
+- userId
+- title
+- date
+- completed
+
+9. SEARCH
+Tìm Todo theo tên.
+
+10. FILTER
+- All
+- Active
+- Completed
+
+Có thể kết hợp Search và Filter.
+
+11. TODO THEO NGÀY
+Todo có date để phục vụ việc tính Streak và Gem.
+
+12. STREAK SYSTEM
+Một ngày được tính là 1 Streak Day nếu người dùng hoàn thành toàn bộ Todo của ngày đó.
+
+Ví dụ:
+18/09: 5/5 -> tính Streak
+19/09: 3/3 -> tính Streak
+20/09: 2/4 -> không tính
+21/09: 2/2 -> tính Streak
+
+Ngày không có Todo không được tính là Streak Day.
+
+13. CURRENT STREAK
+Hiển thị số ngày hoàn thành liên tiếp hiện tại.
+
+14. LONGEST STREAK
+Hiển thị kỷ lục Streak cao nhất của người dùng.
+
+15. STREAK CALENDAR
+Hiển thị lịch sử hoàn thành theo ngày, giúp người dùng theo dõi Streak.
+
+16. GEM SYSTEM
+Khi hoàn thành toàn bộ Todo của một ngày:
+-> +1 Gem
+
+QUY TẮC QUAN TRỌNG:
+- Mỗi tài khoản chỉ được nhận tối đa 1 Gem mỗi ngày.
+- Nếu đã nhận Gem trong ngày, thêm/chỉnh sửa/hoàn thành Todo mới trong cùng ngày không nhận thêm Gem.
+- Ngày không có Todo không nhận Gem.
+
+17. RECOVER STREAK
+- 5 Gem -> Recover Streak 1 lần.
+- Chỉ cho phép Recover khi Streak thực sự bị mất.
+- Khi Recover: trừ 5 Gem và khôi phục Streak theo logic đã thiết kế.
+
+18. STATISTICS
+Hiển thị:
+- Total Tasks
+- Completed Tasks
+- Active Tasks
+- Completion Rate
+- Current Streak
+- Longest Streak
+- Gems
+- Streak Calendar
+
+19. DARK / LIGHT MODE
+Có Light Mode và Dark Mode.
+Lựa chọn được lưu bằng localStorage.
+
+20. VIỆT / ANH
+Hỗ trợ:
+- Vietnamese
+- English
+
+Dùng file translations/en.js và translations/vi.js.
+Ngôn ngữ được lưu để giữ lựa chọn sau khi refresh.
+
+21. SETTINGS
+Gồm:
+- Appearance: Light / Dark
+- Language: Vietnamese / English
+- Account: Username, Email, Logout
+
+22. ROUTING
+Các route:
+- /login
+- /signup
+- /forgot-password
+- /reset-password
+- /
+- /statistics
+- /settings
+- /todo/:id
+
+/todo/:id là dynamic route (route động).
+
+23. COMPONENT ARCHITECTURE
+Dự kiến:
+
+src/
+├── components/
+│   ├── Navbar.jsx
+│   ├── TodoForm.jsx
+│   ├── TodoItem.jsx
+│   ├── TodoList.jsx
+│   ├── StreakCard.jsx
+│   ├── StreakCalendar.jsx
+│   └── GemDisplay.jsx
+│
+├── pages/
+│   ├── Login.jsx
+│   ├── Signup.jsx
+│   ├── ForgotPassword.jsx
+│   ├── ResetPassword.jsx
+│   ├── Home.jsx
+│   ├── Statistics.jsx
+│   ├── Settings.jsx
+│   └── TodoDetail.jsx
+│
+├── translations/
+│   ├── en.js
+│   └── vi.js
+│
+├── utils/
+│   └── streak.js
+│
+├── App.jsx
+├── main.jsx
+└── style.css
+
+24. REACT STATE MANAGEMENT
+Các state chính có thể gồm:
+- currentUser
+- todos
+- search
+- filter
+- theme
+- language
+- gems
+
+Sử dụng React useState/useReducer khi phù hợp.
+State thay đổi -> React re-render -> UI cập nhật.
+
+25. LOCAL STORAGE
+Có thể tổ chức dữ liệu:
+- accounts
+- currentUser
+- todos
+- language
+- theme
+
+Account ví dụ:
+{
+    id,
+    username,
+    email,
+    password,
+    securityQuestion,
+    securityAnswer,
+    gems
+}
+
+Todo ví dụ:
+{
+    id,
+    userId,
+    title,
+    date,
+    completed
+}
+
+Streak nên được tính từ lịch sử Todo thay vì lưu một con số dư thừa nếu có thể.
+
+26. RESPONSIVE DESIGN
+- Mobile: < 768px
+- Tablet: 768–1024px
+- Desktop: > 1024px
+
+Sử dụng:
+- Flexbox
+- CSS Grid
+- Media Queries
+
+27. UI / UX
+Có:
+- Hover effects
+- Transition
+- Animation
+- Todo completion animation
+- Button feedback
+- Empty state
+- Error state
+- Form validation
+- Responsive navigation
+
+28. ACCESSIBILITY
+- Semantic HTML
+- Label cho form
+- Alt text
+- Button có tên rõ ràng
+- Keyboard-friendly
+- Contrast phù hợp
+- Không chỉ dựa vào màu sắc để biểu thị trạng thái
+
+29. LUỒNG SỬ DỤNG TỔNG THỂ
+
+SIGN UP
+-> LOGIN
+-> TODO LIST
+-> Add / Edit / Delete / Complete
+-> Hoàn thành toàn bộ Todo của ngày
+-> +1 Streak
+-> +1 Gem
+-> 5 Gem -> Recover Streak
+
+LOGIN
+-> Forgot Password
+-> Security Question
+-> Reset Password
+-> Login
+
+30. ĐÁP ỨNG ĐỀ BÀI
+- HTML5: Có
+- CSS3: Có
+- JavaScript ES6+: Có
+- React: Có
+- Vite: Có
+- Flexbox/Grid: Có
+- Responsive: Có
+- >=3 pages: Có
+- Reusable Components: Có
+- User interactions: Có
+- Form validation: Có
+- State Management: Có
+- localStorage: Có
+- React Router: Có
+- >=3 routes: Có
+- Dynamic route: Có
+- Animation/Transition: Có
+- Dark/Light: Có
+- Accessibility: Có
+- Git/GitHub: Có
+- Deployment: Có
+- 2 languages: Có (bonus)
+- Authentication simulation: Có
+- Streak: Có
+- Gamification: Có
+- Gem / Recover Streak: Có
+- Remember Me: Có
+
+31. STACK CUỐI CÙNG
+React
+Vite
+JavaScript
+CSS
+React Router
+localStorage
+Git
+GitHub
+
+Không backend.
+
+32. TÓM TẮT
+Một Todo List Web App frontend-only cho phép người dùng tạo tài khoản, đăng nhập, ghi nhớ đăng nhập, khôi phục mật khẩu bằng câu hỏi bảo mật, quản lý Todo theo ngày, duy trì Streak, nhận tối đa 1 Gem mỗi ngày khi hoàn thành toàn bộ Todo và sử dụng 5 Gem để Recover Streak. App hỗ trợ Statistics, Streak Calendar, Dark/Light Mode, Vietnamese/English, Responsive Design, Accessibility, React Components, State Management, localStorage và Dynamic Routing.
