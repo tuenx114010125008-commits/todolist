@@ -32,7 +32,9 @@ export default function Home({ user, todos, onAdd, onToggle, onDelete, onRecover
           current={stats.currentStreak}
           longest={stats.longestStreak}
           gems={gems}
-          canRecover={stats.isStreakLost && gems >= 5}
+          gemProgress={stats.gemProgress}
+          canRecover={Boolean(stats.recoveryDate && gems >= 1)}
+          recoveryDate={stats.recoveryDate}
           onRecover={onRecover}
           t={t}
         />
@@ -59,7 +61,14 @@ export default function Home({ user, todos, onAdd, onToggle, onDelete, onRecover
           <TodoForm onAdd={onAdd} selectedDate={selectedDate} onDateChange={setSelectedDate} t={t} />
           <TodoList todos={visible} onToggle={onToggle} onDelete={onDelete} t={t} />
         </div>
-        <StreakCalendar completedDays={stats.completedDays} missedDays={stats.missedDays} t={t} />
+        <StreakCalendar
+          completedDays={stats.completedDays}
+          missedDays={stats.missedDays}
+          recoveredDays={stats.recoveredDays}
+          onRecoverDay={onRecover}
+          gems={gems}
+          t={t}
+        />
       </section>
     </main>
   )

@@ -11,7 +11,7 @@ import Settings from './pages/Settings'
 import TodoDetail from './pages/TodoDetail'
 import en from './translations/en'
 import vi from './translations/vi'
-import { addDays, dateKey, getStreakStats } from './utils/streak'
+import { addDays, dateKey, evaluateGemRewards, getStreakStats } from './utils/streak'
 import './App.css'
 
 const readJson = (key, fallback, storage = localStorage) => {
@@ -32,6 +32,7 @@ const DEMO_ACCOUNT = {
   gems: 3,
   gemDates: [],
   recoveredDays: [],
+  awardedCycles: [],
 }
 
 const createDemoTodos = () => {
@@ -80,6 +81,7 @@ function App() {
           gems: currentAccount.gems || 0,
           gemDates: currentAccount.gemDates || [],
           recoveredDays: currentAccount.recoveredDays || [],
+          awardedCycles: currentAccount.awardedCycles || [],
         }
         : null,
     [currentAccount],
@@ -153,6 +155,7 @@ function App() {
       gems: 0,
       gemDates: [],
       recoveredDays: [],
+      awardedCycles: [],
     }
     setAccounts((items) => [...items, next])
     return true
@@ -164,16 +167,18 @@ function App() {
     setUser(null)
   }
 
-  const awardGem = (nextTodos, date) => {
-    if (!activeUser) return
-    const dayTodos = nextTodos.filter((todo) => todo.userId === activeUser.id && todo.date === date)
-    if (!dayTodos.length || !dayTodos.every((todo) => todo.completed)) return
-    if (activeUser.gemDates.includes(date)) return
-    syncAccount({
-      ...activeUser,
-      gems: activeUser.gems + 1,
-      gemDates: [...activeUser.gemDates, date],
-    })
+  const checkAndAwardGems = (nextTodos, account = activeUser) => {
+    if (!account) return
+    const accountTodos = nextTodos.filter((todo) => todo.userId === account.id)
+    const reward = evaluateGemRewards(account, accountTodos)
+    if (reward) {
+      syncAccount({
+        ...account,
+        gems: account.gems + reward.newGems,
+        awardedCycles: reward.updatedAwardedCycles,
+        gemDates: [...(account.gemDates || []), dateKey()],
+      })
+    }
   }
 
   const addTodo = ({ title, date }) => {
@@ -186,15 +191,12 @@ function App() {
   const toggleTodo = (id) => {
     const nextTodos = todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo))
     setTodos(nextTodos)
-    const changed = nextTodos.find((todo) => todo.id === id)
-    if (changed?.completed) awardGem(nextTodos, changed.date)
+    checkAndAwardGems(nextTodos)
   }
 
   const deleteTodo = (id) => {
-    const removed = todos.find((todo) => todo.id === id)
     const nextTodos = todos.filter((todo) => todo.id !== id)
     setTodos(nextTodos)
-    if (removed) awardGem(nextTodos, removed.date)
   }
 
   const editTodo = (id, changes) => {
@@ -202,20 +204,35 @@ function App() {
       todo.id === id ? { ...todo, ...changes, title: changes.title.trim() } : todo,
     )
     setTodos(nextTodos)
-    const changed = nextTodos.find((todo) => todo.id === id)
-    if (changed?.completed) awardGem(nextTodos, changed.date)
+    checkAndAwardGems(nextTodos)
   }
 
-  const recoverStreak = () => {
+  const recoverStreak = (targetDate) => {
+    if (!activeUser || activeUser.gems < 1) return
     const stats = getStreakStats(userTodos, activeUser.recoveredDays)
-    if (!activeUser || activeUser.gems < 5 || !stats.isStreakLost || !stats.recoveryDate) return
-    if (activeUser.recoveredDays.includes(stats.recoveryDate)) return
+    const dateToRecover = targetDate || stats.recoveryDate
+    if (!dateToRecover || activeUser.recoveredDays.includes(dateToRecover)) return
 
-    syncAccount({
+    const nextRecoveredDays = [...activeUser.recoveredDays, dateToRecover]
+    const nextGems = activeUser.gems - 1
+
+    let updatedUser = {
       ...activeUser,
-      gems: activeUser.gems - 5,
-      recoveredDays: [...activeUser.recoveredDays, stats.recoveryDate],
-    })
+      gems: nextGems,
+      recoveredDays: nextRecoveredDays,
+    }
+
+    const reward = evaluateGemRewards(updatedUser, userTodos)
+    if (reward) {
+      updatedUser = {
+        ...updatedUser,
+        gems: updatedUser.gems + reward.newGems,
+        awardedCycles: reward.updatedAwardedCycles,
+        gemDates: [...(updatedUser.gemDates || []), dateKey()],
+      }
+    }
+
+    syncAccount(updatedUser)
   }
 
   const resetPassword = (id, password) => {
@@ -257,6 +274,7 @@ function App() {
                       todos={userTodos}
                       gems={activeUser?.gems || 0}
                       recoveredDays={activeUser?.recoveredDays || []}
+                      onRecover={recoverStreak}
                       t={t}
                     />
                   }

@@ -359,45 +359,135 @@ h2 {
   gap: 12px;
 }
 
+.streak-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .streak-icon {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   place-items: center;
-  border-radius: 8px;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  font-weight: 900;
+  border-radius: 12px;
+  color: #ff6b00;
+  background: color-mix(in srgb, #ff6b00 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, #ff6b00 25%, transparent);
+  font-size: 1.5rem;
 }
 
 .streak-number {
   display: flex;
-  align-items: end;
-  gap: 8px;
-  font-size: 3.2rem;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 2.8rem;
   font-weight: 900;
   line-height: 1;
 }
 
 .streak-number small {
-  margin-bottom: 6px;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .streak-meta {
+  display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+}
+
+.streak-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
   color: var(--muted);
+}
+
+.streak-pill b {
+  color: var(--text);
+}
+
+.streak-pill.gem-pill b {
+  color: #0284c7;
+}
+
+.gem-progress-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  display: grid;
+  gap: 6px;
+}
+
+.gem-progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.gem-progress-info b {
+  color: var(--text);
+}
+
+.gem-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.gem-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #06b6d4, #10b981);
+  border-radius: 999px;
+  transition: width 300ms ease;
+}
+
+.gem-progress-note {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: 0;
 }
 
 .recover-box {
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: 10px;
+  display: grid;
+  gap: 6px;
 }
 
 .recover-box p {
   color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.recover-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+.recover-button:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
 }
 
 .section-heading {
@@ -423,57 +513,75 @@ h2 {
   border-radius: 8px;
   color: var(--muted);
   background: var(--surface-strong);
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: 800;
-  transition: 160ms ease;
+  transition: all 160ms ease;
+  padding: 0;
+  outline: none;
 }
 
-.calendar-day span {
+.calendar-day-num {
   position: relative;
   z-index: 1;
 }
 
-.calendar-day.marked {
-  color: #7a2f00;
-  background: color-mix(in srgb, #fff5dc 72%, var(--surface));
-  border-color: #f28c28;
+.calendar-day-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.65rem;
+  line-height: 1;
 }
 
-.calendar-day.marked::before {
-  position: absolute;
-  inset: -8px -5px -3px;
-  display: grid;
-  place-items: center;
-  color: #f28c28;
-  content: "🔥";
-  filter: drop-shadow(0 4px 7px rgba(180, 78, 0, 0.25));
-  font-size: 2.45rem;
-  line-height: 1;
+.calendar-day.completed {
+  color: #c2410c;
+  background: color-mix(in srgb, #ffedd5 65%, var(--surface));
+  border-color: #f97316;
+}
+
+.calendar-day.recovered {
+  color: #0369a1;
+  background: color-mix(in srgb, #e0f2fe 75%, var(--surface));
+  border-color: #0284c7;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #0284c7 25%, transparent);
 }
 
 .calendar-day.missed {
   color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 8%, var(--surface-strong));
-  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface-strong));
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+  cursor: pointer;
 }
 
-.calendar-day.missed::before,
-.calendar-day.missed::after {
-  position: absolute;
-  inset: 50% 16%;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--danger);
-  content: "";
-  transform: translateY(-50%) rotate(45deg);
+.calendar-day.missed:hover {
+  transform: scale(1.08);
+  border-color: var(--danger);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--danger) 25%, transparent);
 }
 
-.calendar-day.missed::after {
-  transform: translateY(-50%) rotate(-45deg);
-}
-
-.calendar-day.missed span {
+.calendar-day.missed .calendar-day-num {
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1.5px;
+}
+
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .auth-page {

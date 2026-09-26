@@ -1,7 +1,7 @@
 import StreakCalendar from '../components/StreakCalendar'
 import { getStreakStats } from '../utils/streak'
 
-export default function Statistics({ todos, gems, recoveredDays, t }) {
+export default function Statistics({ todos, gems, recoveredDays, onRecover, t }) {
   const stats = getStreakStats(todos, recoveredDays)
   const completed = todos.filter((todo) => todo.completed).length
   const values = [
@@ -11,7 +11,8 @@ export default function Statistics({ todos, gems, recoveredDays, t }) {
     [t.completionRate, `${todos.length ? Math.round((completed / todos.length) * 100) : 0}%`],
     [t.currentStreak, `${stats.currentStreak} ${t.days}`],
     [t.longestStreak, `${stats.longestStreak} ${t.days}`],
-    [t.gems, gems],
+    [t.gemProgress, `${stats.gemProgress}/7`],
+    [t.gems, `💎 ${gems}`],
   ]
 
   return (
@@ -28,7 +29,14 @@ export default function Statistics({ todos, gems, recoveredDays, t }) {
           </div>
         ))}
       </div>
-      <StreakCalendar completedDays={stats.completedDays} missedDays={stats.missedDays} t={t} />
+      <StreakCalendar
+        completedDays={stats.completedDays}
+        missedDays={stats.missedDays}
+        recoveredDays={stats.recoveredDays}
+        onRecoverDay={onRecover}
+        gems={gems}
+        t={t}
+      />
     </main>
   )
 }
