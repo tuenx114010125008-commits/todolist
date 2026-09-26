@@ -28,7 +28,7 @@ export default function Statistics({ todos, gems, recoveredDays, t }) {
           </div>
         ))}
       </div>
-      <StreakCalendar completedDays={stats.completedDays} t={t} />
+      <StreakCalendar completedDays={stats.completedDays} missedDays={stats.missedDays} t={t} />
     </main>
   )
 }

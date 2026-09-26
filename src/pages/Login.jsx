@@ -30,6 +30,12 @@ export default function Login({ onLogin, t }) {
           {error && <p className="error-text">{error}</p>}
           <button className="primary-button full" type="submit">{t.signIn}</button>
         </form>
+        <button className="text-button demo-button" type="button" onClick={() => {
+          const result = onLogin({ email: 'demo@daymark.app', password: 'daymark', remember: true })
+          if (result) navigate('/')
+        }}>
+          {t.demoLogin}
+        </button>
         <p className="auth-footer">{t.newHere} <Link to="/signup">{t.signUp}</Link></p>
       </div>
     </main>

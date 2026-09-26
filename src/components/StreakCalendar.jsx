@@ -1,6 +1,6 @@
 import { addDays, dateKey } from '../utils/streak'
 
-export default function StreakCalendar({ completedDays, selectedDate, onSelectDate, t }) {
+export default function StreakCalendar({ completedDays, missedDays = new Set(), t }) {
   const days = Array.from({ length: 28 }, (_, index) => addDays(dateKey(), -27 + index))
 
   return (
@@ -9,19 +9,23 @@ export default function StreakCalendar({ completedDays, selectedDate, onSelectDa
         <h2>{t.calendar}</h2>
         <span>{t.lastFourWeeks}</span>
       </div>
-      <div className="calendar-grid">
-        {days.map((day) => (
-          <button
-            key={day}
-            type="button"
-            className={`${completedDays.has(day) ? 'marked' : ''} ${selectedDate === day ? 'selected' : ''}`}
-            title={day}
-            aria-label={day}
-            onClick={() => onSelectDate?.(day)}
-          >
-            <span>{new Date(`${day}T00:00:00`).getDate()}</span>
-          </button>
-        ))}
+      <div className="calendar-grid" role="list">
+        {days.map((day) => {
+          const isStreakDay = completedDays.has(day)
+          const isMissedDay = missedDays.has(day)
+
+          return (
+            <div
+              key={day}
+              className={`calendar-day ${isStreakDay ? 'marked' : ''} ${isMissedDay ? 'missed' : ''}`}
+              title={day}
+              aria-label={day}
+              role="listitem"
+            >
+              <span>{new Date(`${day}T00:00:00`).getDate()}</span>
+            </div>
+          )
+        })}
       </div>
     </section>
   )

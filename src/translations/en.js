@@ -24,6 +24,7 @@ export default {
   gems: 'Gems',
   days: 'days',
   signIn: 'Sign in',
+  demoLogin: 'Use sample account (demo@daymark.app)',
   signUp: 'Create account',
   email: 'Email',
   password: 'Password',

@@ -24,6 +24,7 @@ export default {
   gems: 'Gem',
   days: 'ngày',
   signIn: 'Đăng nhập',
+  demoLogin: 'Dùng tài khoản mẫu (demo@daymark.app)',
   signUp: 'Tạo tài khoản',
   email: 'Email',
   password: 'Mật khẩu',

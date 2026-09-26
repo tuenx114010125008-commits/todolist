@@ -37,8 +37,20 @@ export const getCompletedDays = (todos, recoveredDays = []) => {
   return completedDays
 }
 
+export const getMissedDays = (todos, recoveredDays = []) => {
+  const grouped = getTodoDayMap(todos)
+  const recovered = new Set(recoveredDays)
+
+  return new Set(
+    Object.entries(grouped)
+      .filter(([date, value]) => !recovered.has(date) && value.total > 0 && value.total !== value.completed)
+      .map(([date]) => date),
+  )
+}
+
 export const getStreakStats = (todos, recoveredDays = []) => {
   const completedDays = getCompletedDays(todos, recoveredDays)
+  const missedDays = getMissedDays(todos, recoveredDays)
   const dates = [...completedDays].sort()
   const today = dateKey()
   const yesterday = addDays(today, -1)
@@ -68,6 +80,7 @@ export const getStreakStats = (todos, recoveredDays = []) => {
 
   return {
     completedDays,
+    missedDays,
     currentStreak,
     longestStreak,
     isStreakLost,

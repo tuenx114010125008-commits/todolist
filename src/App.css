@@ -259,6 +259,11 @@ h2 {
   padding: 10px 0;
 }
 
+.demo-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
 .text-button.danger {
   color: var(--danger);
 }
@@ -409,7 +414,10 @@ h2 {
   gap: 8px;
 }
 
-.calendar-grid button {
+.calendar-day {
+  position: relative;
+  display: grid;
+  place-items: center;
   aspect-ratio: 1;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -419,14 +427,53 @@ h2 {
   transition: 160ms ease;
 }
 
-.calendar-grid button.marked {
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border-color: var(--accent);
+.calendar-day span {
+  position: relative;
+  z-index: 1;
 }
 
-.calendar-grid button.selected {
-  box-shadow: inset 0 0 0 2px var(--accent);
+.calendar-day.marked {
+  color: #7a2f00;
+  background: color-mix(in srgb, #fff5dc 72%, var(--surface));
+  border-color: #f28c28;
+}
+
+.calendar-day.marked::before {
+  position: absolute;
+  inset: -8px -5px -3px;
+  display: grid;
+  place-items: center;
+  color: #f28c28;
+  content: "🔥";
+  filter: drop-shadow(0 4px 7px rgba(180, 78, 0, 0.25));
+  font-size: 2.45rem;
+  line-height: 1;
+}
+
+.calendar-day.missed {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface-strong));
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+}
+
+.calendar-day.missed::before,
+.calendar-day.missed::after {
+  position: absolute;
+  inset: 50% 16%;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--danger);
+  content: "";
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.calendar-day.missed::after {
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+.calendar-day.missed span {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 
 .auth-page {

@@ -11,7 +11,7 @@ import Settings from './pages/Settings'
 import TodoDetail from './pages/TodoDetail'
 import en from './translations/en'
 import vi from './translations/vi'
-import { getStreakStats } from './utils/streak'
+import { addDays, dateKey, getStreakStats } from './utils/streak'
 import './App.css'
 
 const readJson = (key, fallback, storage = localStorage) => {
@@ -20,6 +20,40 @@ const readJson = (key, fallback, storage = localStorage) => {
   } catch {
     return fallback
   }
+}
+
+const DEMO_ACCOUNT = {
+  id: 'demo',
+  username: 'Demo',
+  email: 'demo@daymark.app',
+  password: 'daymark',
+  securityQuestion: 'Demo account',
+  securityAnswer: 'daymark',
+  gems: 3,
+  gemDates: [],
+  recoveredDays: [],
+}
+
+const createDemoTodos = () => {
+  const today = dateKey()
+  const day = (offset) => addDays(today, offset)
+  const todo = (offset, title, completed) => ({
+    id: `demo-${offset}-${title.toLowerCase().replaceAll(' ', '-')}`,
+    userId: DEMO_ACCOUNT.id,
+    title,
+    date: day(offset),
+    completed,
+  })
+
+  return [
+    todo(0, 'Review today\'s priorities', true),
+    todo(0, 'Read for 20 minutes', true),
+    todo(-1, 'Plan tomorrow', true),
+    todo(-2, 'Take a short walk', true),
+    todo(-3, 'Write a daily reflection', true),
+    todo(-4, 'Finish weekly report', false),
+    todo(-6, 'Organize the workspace', true),
+  ]
 }
 
 function Protected({ user, children }) {
@@ -77,12 +111,21 @@ function App() {
     const found = accounts.find(
       (account) => account.email.toLowerCase() === normalizedEmail && account.password === password,
     )
-    const demo =
-      normalizedEmail === 'demo@daymark.app' && password === 'daymark'
-        ? { id: 'demo', username: 'Demo', email: normalizedEmail, password, gems: 3, gemDates: [], recoveredDays: [] }
-        : null
+    const demo = normalizedEmail === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password ? DEMO_ACCOUNT : null
     const nextUser = found || demo
     if (!nextUser) return false
+
+    if (demo) {
+      setAccounts((items) => {
+        const exists = items.some((account) => account.id === DEMO_ACCOUNT.id)
+        return exists ? items : [...items, DEMO_ACCOUNT]
+      })
+      setTodos((items) => {
+        const seeded = createDemoTodos()
+        const existingIds = new Set(items.map((todo) => todo.id))
+        return [...items, ...seeded.filter((todo) => !existingIds.has(todo.id))]
+      })
+    }
 
     localStorage.removeItem('daymark_session')
     sessionStorage.removeItem('daymark_session')

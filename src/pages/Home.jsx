@@ -59,7 +59,7 @@ export default function Home({ user, todos, onAdd, onToggle, onDelete, onRecover
           <TodoForm onAdd={onAdd} selectedDate={selectedDate} onDateChange={setSelectedDate} t={t} />
           <TodoList todos={visible} onToggle={onToggle} onDelete={onDelete} t={t} />
         </div>
-        <StreakCalendar completedDays={stats.completedDays} selectedDate={selectedDate} onSelectDate={setSelectedDate} t={t} />
+        <StreakCalendar completedDays={stats.completedDays} missedDays={stats.missedDays} t={t} />
       </section>
     </main>
   )
