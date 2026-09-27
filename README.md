@@ -19,6 +19,17 @@ npm install
 npm run dev
 ```
 
+## Test Account
+
+Bạn có thể đăng nhập bằng tài khoản mẫu để thử nghiệm:
+
+| Trường   | Giá trị                    |
+|----------|---------------------------|
+| Email    | `demo.daymark@gmail.com`  |
+| Mật khẩu | `daymark`                 |
+
+> Tài khoản mẫu có sẵn dữ liệu streak, gem và các task mẫu.
+
 ## Build
 
 ```bash

@@ -31,7 +31,7 @@ export default function Login({ onLogin, t }) {
           <button className="primary-button full" type="submit">{t.signIn}</button>
         </form>
         <button className="text-button demo-button" type="button" onClick={() => {
-          const result = onLogin({ email: 'demo@daymark.app', password: 'daymark', remember: true })
+          const result = onLogin({ email: 'demo.daymark@gmail.com', password: 'daymark', remember: true })
           if (result) navigate('/')
         }}>
           {t.demoLogin}

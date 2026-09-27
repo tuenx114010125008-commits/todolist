@@ -11,8 +11,7 @@ export default function Settings({ user, theme, language, onThemeChange, onLangu
   return (
     <main className="page-shell narrow">
       <div className="simple-heading">
-        <p className="eyebrow">{t.settingsTitle}</p>
-        <h1>{t.settingsHeading}</h1>
+        <h1>{t.settingsTitle}</h1>
       </div>
       <section className="settings-list">
         <div className="setting-row">

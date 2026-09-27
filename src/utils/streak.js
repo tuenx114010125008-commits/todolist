@@ -48,20 +48,19 @@ export const getMissedDays = (todos, recoveredDays = []) => {
   const today = dateKey()
   const missedDays = new Set()
 
-  // 1. Days with todos where not all todos are completed and not recovered
+  // 1. Past days with recorded todos where not all todos were completed
   Object.entries(grouped).forEach(([date, value]) => {
     if (date < today && !recoveredSet.has(date) && value.total > 0 && value.total !== value.completed) {
       missedDays.add(date)
     }
   })
 
-  // 2. Gap days in the past 28-day window that broke a streak
+  // 2. Past gap days in the 28-day window that broke an ongoing streak
   for (let offset = -28; offset < 0; offset++) {
     const day = addDays(today, offset)
     if (!allStreakDays.has(day) && !recoveredSet.has(day)) {
       const prev = addDays(day, -1)
       const next = addDays(day, 1)
-      // If previous day was completed/recovered or next day is completed/recovered
       if (allStreakDays.has(prev) || allStreakDays.has(next)) {
         missedDays.add(day)
       }
@@ -71,6 +70,7 @@ export const getMissedDays = (todos, recoveredDays = []) => {
   return missedDays
 }
 
+// Rule: 7 ngày hoàn thành todo liên tiếp = 1 Gem
 export const calculateAwardableGemCycles = (todos, recoveredDays = []) => {
   const fullyCompleted = getFullyCompletedDays(todos)
   const streakSet = new Set([...fullyCompleted, ...recoveredDays])
@@ -160,10 +160,10 @@ export const getStreakStats = (todos, recoveredDays = []) => {
     }
   }
 
-  // Gem progress towards next 7-day milestone
+  // Gem progress: progress towards next 7-day milestone
   const gemProgress = currentStreak % 7
 
-  // Identify recovery date
+  // Identify recovery date (only when streak is actually lost or broken)
   let isStreakLost = false
   let recoveryDate = null
 
@@ -179,7 +179,6 @@ export const getStreakStats = (todos, recoveredDays = []) => {
       }
     }
   } else if (startOfCurrentStreak) {
-    // Current streak is active; check if the day right before this streak can be recovered
     const dayBeforeStreak = addDays(startOfCurrentStreak, -1)
     if (missedDays.has(dayBeforeStreak) || (allStreakDays.has(addDays(dayBeforeStreak, -1)) && !allStreakDays.has(dayBeforeStreak))) {
       recoveryDate = dayBeforeStreak

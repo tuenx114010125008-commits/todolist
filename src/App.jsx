@@ -25,36 +25,81 @@ const readJson = (key, fallback, storage = localStorage) => {
 const DEMO_ACCOUNT = {
   id: 'demo',
   username: 'Demo',
-  email: 'demo@daymark.app',
+  email: 'demo.daymark@gmail.com',
   password: 'daymark',
   securityQuestion: 'Demo account',
   securityAnswer: 'daymark',
-  gems: 3,
+  gems: 7,
   gemDates: [],
-  recoveredDays: [],
+  recoveredDays: ['2026-09-23', '2026-09-24'],
   awardedCycles: [],
 }
 
+const DEMO_SEED_VERSION = 'v5_streak_fix'
+
 const createDemoTodos = () => {
   const today = dateKey()
-  const day = (offset) => addDays(today, offset)
-  const todo = (offset, title, completed) => ({
-    id: `demo-${offset}-${title.toLowerCase().replaceAll(' ', '-')}`,
+  const todo = (idSuffix, date, title, completed) => ({
+    id: `demo-${date}-${idSuffix}`,
     userId: DEMO_ACCOUNT.id,
     title,
-    date: day(offset),
+    date,
     completed,
   })
 
-  return [
-    todo(0, 'Review today\'s priorities', true),
-    todo(0, 'Read for 20 minutes', true),
-    todo(-1, 'Plan tomorrow', true),
-    todo(-2, 'Take a short walk', true),
-    todo(-3, 'Write a daily reflection', true),
-    todo(-4, 'Finish weekly report', false),
-    todo(-6, 'Organize the workspace', true),
+  const items = [
+    // Day 10 (2026-09-10: Completed 🔥)
+    todo('1', '2026-09-10', 'Setup project repository', true),
+    todo('2', '2026-09-10', 'Review wireframe designs', true),
+
+    // Day 11 (2026-09-11: Missed ✕ - has incomplete task)
+    todo('1', '2026-09-11', 'Setup design system tokens', true),
+    todo('2', '2026-09-11', 'Prepare sprint backlog', false),
+    todo('3', '2026-09-11', 'Client feedback review', false),
+
+    // Day 12 (2026-09-12: Completed 🔥)
+    todo('1', '2026-09-12', 'Update typography scale', true),
+    todo('2', '2026-09-12', 'Design color palette tokens', true),
+
+    // Day 13 (2026-09-13: Missed ✕ - has incomplete task)
+    todo('1', '2026-09-13', 'Weekly architecture sync', true),
+    todo('2', '2026-09-13', 'Update API documentation', false),
+
+    // Day 20 (2026-09-20: Missed ✕ - has incomplete task)
+    todo('1', '2026-09-20', 'Archive old project assets', false),
+    todo('2', '2026-09-20', 'Review team pull requests', false),
+
+    // Day 21 (2026-09-21: Missed ✕ - has incomplete task so recovering Day 22 gives streak = 6)
+    todo('1', '2026-09-21', 'Organize the workspace', true),
+    todo('2', '2026-09-21', 'Clean up project dependencies', false),
+
+    // Day 22 (2026-09-22: Missed ✕ - has incomplete task)
+    todo('1', '2026-09-22', 'Weekly backup check', true),
+    todo('2', '2026-09-22', 'Draft design presentation', false),
+    todo('3', '2026-09-22', 'Send follow-up emails', false),
+
+    // Day 25 (2026-09-25: Completed 🔥)
+    todo('1', '2026-09-25', 'Take a short walk', true),
+    todo('2', '2026-09-25', 'Write code documentation', true),
+
+    // Day 26 (2026-09-26: Completed 🔥)
+    todo('1', '2026-09-26', 'Plan tomorrow goals', true),
+    todo('2', '2026-09-26', 'Review pull requests', true),
+
+    // Day 27 (2026-09-27: Completed 🔥)
+    todo('1', '2026-09-27', 'Review today\'s priorities', true),
+    todo('2', '2026-09-27', 'Read for 20 minutes', true),
   ]
+
+  // If today is beyond 2026-09-27, also seed today with active tasks
+  if (today > '2026-09-27') {
+    items.push(
+      todo('1', today, 'Review today\'s priorities', false),
+      todo('2', today, 'Read for 20 minutes', false),
+    )
+  }
+
+  return items
 }
 
 function Protected({ user, children }) {
@@ -103,6 +148,22 @@ function App() {
     storage.setItem('daymark_session', JSON.stringify(activeUser))
   }, [activeUser])
 
+  // One-time versioned seed migration for demo account: guarantees proper todos for Days 10, 11, 12, 13, 20, 21, 22, 25, 26, 27
+  // and allows user to delete any todo without it being resurrected!
+  useEffect(() => {
+    if (activeUser?.id === DEMO_ACCOUNT.id) {
+      const currentVersion = localStorage.getItem('daymark_demo_version')
+      if (currentVersion !== DEMO_SEED_VERSION) {
+        const seeded = createDemoTodos()
+        setTodos((prevTodos) => {
+          const nonDemoTodos = prevTodos.filter((todo) => todo.userId !== DEMO_ACCOUNT.id)
+          return [...nonDemoTodos, ...seeded]
+        })
+        localStorage.setItem('daymark_demo_version', DEMO_SEED_VERSION)
+      }
+    }
+  }, [activeUser?.id])
+
   const syncAccount = (nextUser) => {
     setUser(nextUser)
     setAccounts((items) => items.map((item) => (item.id === nextUser.id ? nextUser : item)))
@@ -122,11 +183,14 @@ function App() {
         const exists = items.some((account) => account.id === DEMO_ACCOUNT.id)
         return exists ? items : [...items, DEMO_ACCOUNT]
       })
-      setTodos((items) => {
+      if (localStorage.getItem('daymark_demo_version') !== DEMO_SEED_VERSION) {
         const seeded = createDemoTodos()
-        const existingIds = new Set(items.map((todo) => todo.id))
-        return [...items, ...seeded.filter((todo) => !existingIds.has(todo.id))]
-      })
+        setTodos((items) => {
+          const nonDemo = items.filter((todo) => todo.userId !== DEMO_ACCOUNT.id)
+          return [...nonDemo, ...seeded]
+        })
+        localStorage.setItem('daymark_demo_version', DEMO_SEED_VERSION)
+      }
     }
 
     localStorage.removeItem('daymark_session')
@@ -176,12 +240,14 @@ function App() {
         ...account,
         gems: account.gems + reward.newGems,
         awardedCycles: reward.updatedAwardedCycles,
-        gemDates: [...(account.gemDates || []), dateKey()],
       })
     }
   }
 
   const addTodo = ({ title, date }) => {
+    const today = dateKey()
+    if (date !== today) return // Only allow adding todo for current day (cannot add for past days)
+
     setTodos((items) => [
       ...items,
       { id: crypto.randomUUID(), userId: activeUser.id, title: title.trim(), date, completed: false },
@@ -189,19 +255,31 @@ function App() {
   }
 
   const toggleTodo = (id) => {
+    const today = dateKey()
+    const target = todos.find((item) => item.id === id)
+    if (target && target.date < today) return // Prevent modifying past days
+
     const nextTodos = todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo))
     setTodos(nextTodos)
     checkAndAwardGems(nextTodos)
   }
 
   const deleteTodo = (id) => {
+    const today = dateKey()
+    const target = todos.find((item) => item.id === id)
+    if (target && target.date < today) return // Prevent deleting past days
+
     const nextTodos = todos.filter((todo) => todo.id !== id)
     setTodos(nextTodos)
   }
 
   const editTodo = (id, changes) => {
+    const today = dateKey()
+    const target = todos.find((item) => item.id === id)
+    if (target && target.date < today) return // Prevent editing past days
+
     const nextTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, ...changes, title: changes.title.trim() } : todo,
+      todo.id === id ? { ...todo, ...changes, title: (changes.title !== undefined ? changes.title.trim() : todo.title) } : todo,
     )
     setTodos(nextTodos)
     checkAndAwardGems(nextTodos)
@@ -228,7 +306,6 @@ function App() {
         ...updatedUser,
         gems: updatedUser.gems + reward.newGems,
         awardedCycles: reward.updatedAwardedCycles,
-        gemDates: [...(updatedUser.gemDates || []), dateKey()],
       }
     }
 
@@ -261,6 +338,7 @@ function App() {
                       onAdd={addTodo}
                       onToggle={toggleTodo}
                       onDelete={deleteTodo}
+                      onEdit={editTodo}
                       onRecover={recoverStreak}
                       gems={activeUser?.gems || 0}
                       t={t}

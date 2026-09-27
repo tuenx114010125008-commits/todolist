@@ -15,11 +15,12 @@ export default function Statistics({ todos, gems, recoveredDays, onRecover, t })
     [t.gems, `💎 ${gems}`],
   ]
 
+  const todoDays = new Set(todos.map((todo) => todo.dueDate).filter(Boolean))
+
   return (
-    <main className="page-shell">
+    <main className="page-shell statistics-page">
       <div className="simple-heading">
-        <p className="eyebrow">{t.nav.statistics}</p>
-        <h1>{t.statsHeading}</h1>
+        <h1>{t.nav.statistics}</h1>
       </div>
       <div className="stats-grid">
         {values.map(([label, value]) => (
@@ -33,6 +34,7 @@ export default function Statistics({ todos, gems, recoveredDays, onRecover, t })
         completedDays={stats.completedDays}
         missedDays={stats.missedDays}
         recoveredDays={stats.recoveredDays}
+        todoDays={todoDays}
         onRecoverDay={onRecover}
         gems={gems}
         t={t}

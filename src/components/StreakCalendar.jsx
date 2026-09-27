@@ -4,21 +4,24 @@ export default function StreakCalendar({
   completedDays = new Set(),
   missedDays = new Set(),
   recoveredDays = new Set(),
+  todoDays = new Set(),
+  selectedDate,
   onRecoverDay,
+  onSelectDay,
   gems = 0,
   t,
 }) {
-  const days = Array.from({ length: 28 }, (_, index) => addDays(dateKey(), -27 + index))
+  const today = dateKey()
+  const days = Array.from({ length: 28 }, (_, index) => addDays(today, -27 + index))
 
-  const handleDayClick = (day, isMissed) => {
-    if (!isMissed || !onRecoverDay) return
-    if (gems < 1) {
-      alert(t.needMoreGems || 'You need at least 1 Gem to recover this day.')
-      return
-    }
-    const message = (t.confirmRecover || 'Spend 1 Gem to recover streak on {date}?').replace('{date}', day)
-    if (window.confirm(message)) {
-      onRecoverDay(day)
+  const windowCompleted = days.filter((day) => completedDays.has(day) && !recoveredDays.has(day)).length
+  const windowRecovered = days.filter((day) => recoveredDays.has(day)).length
+  const windowMissed = days.filter((day) => missedDays.has(day) && !recoveredDays.has(day)).length
+
+  const handleDayClick = (day) => {
+    // When clicking any clickable day (including missed days), only select it to view its details
+    if (onSelectDay) {
+      onSelectDay(day)
     }
   }
 
@@ -29,10 +32,17 @@ export default function StreakCalendar({
         <span>{t.lastFourWeeks}</span>
       </div>
       <div className="calendar-grid" role="list">
+        {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((d) => (
+          <span key={d} className="calendar-weekday">{d}</span>
+        ))}
         {days.map((day) => {
           const isRecovered = recoveredDays.has(day)
           const isCompleted = completedDays.has(day) && !isRecovered
           const isMissed = missedDays.has(day) && !isRecovered
+          const hasTodos = todoDays.has(day)
+          const isToday = day === today
+          const isSelected = selectedDate === day
+          const isClickable = onSelectDay ? (hasTodos || isToday || isMissed) : true
 
           let statusClass = ''
           let badge = null
@@ -41,15 +51,31 @@ export default function StreakCalendar({
           if (isRecovered) {
             statusClass = 'recovered'
             badge = '💎'
-            tooltip = `${day}: ${t.recovered || 'Recovered'}`
+            tooltip = `${day}: ${t.recovered || 'Đã khôi phục'}`
           } else if (isCompleted) {
             statusClass = 'completed marked'
             badge = '🔥'
-            tooltip = `${day}: ${t.completedDay || 'Completed (100%)'}`
+            tooltip = `${day}: ${t.completedDay || 'Đã hoàn thành (100%)'}`
           } else if (isMissed) {
             statusClass = 'missed'
             badge = '✕'
-            tooltip = `${day}: ${t.missed || 'Missed'}${gems >= 1 ? ` • ${t.clickToRecover || 'Click to recover (1 Gem)'}` : ''}`
+            tooltip = `${day}: ${t.missed || 'Bị lỡ'}`
+          } else if (hasTodos) {
+            statusClass = 'has-todos'
+            tooltip = `${day}: ${t.activeTasks || 'Có việc cần làm'}`
+          }
+
+          if (isToday) {
+            statusClass += ' is-today'
+            tooltip += ` (${t.today || 'Hôm nay'})`
+          }
+
+          if (isSelected) {
+            statusClass += ' selected'
+          }
+
+          if (!onSelectDay) {
+            statusClass += ' display-only'
           }
 
           return (
@@ -59,8 +85,9 @@ export default function StreakCalendar({
               className={`calendar-day ${statusClass}`}
               title={tooltip}
               aria-label={tooltip}
-              onClick={() => handleDayClick(day, isMissed)}
-              disabled={!isMissed}
+              onClick={() => handleDayClick(day)}
+              disabled={onSelectDay ? !isClickable : false}
+              tabIndex={onSelectDay && !isClickable ? -1 : 0}
             >
               <span className="calendar-day-num">{new Date(`${day}T00:00:00`).getDate()}</span>
               {badge && (
@@ -73,14 +100,20 @@ export default function StreakCalendar({
         })}
       </div>
       <div className="calendar-legend">
-        <span className="legend-item">
-          <span className="legend-icon flame" aria-hidden="true">🔥</span> {t.completedDay || 'Completed'}
+        <span className="legend-item legend-item-completed" title={`${windowCompleted} ${t.completedDay || 'ngày hoàn thành 100%'}`}>
+          <span className="legend-icon flame" aria-hidden="true">🔥</span>
+          <span className="legend-label">{t.completedDay || 'Đã hoàn thành'}</span>
+          <span className="legend-count">({windowCompleted})</span>
         </span>
-        <span className="legend-item">
-          <span className="legend-icon gem" aria-hidden="true">💎</span> {t.recovered || 'Recovered'}
+        <span className="legend-item legend-item-recovered" title={`${windowRecovered} ${t.recovered || 'ngày đã khôi phục'}`}>
+          <span className="legend-icon gem" aria-hidden="true">💎</span>
+          <span className="legend-label">{t.recovered || 'Đã khôi phục'}</span>
+          <span className="legend-count">({windowRecovered})</span>
         </span>
-        <span className="legend-item">
-          <span className="legend-icon missed" aria-hidden="true">✕</span> {t.missed || 'Missed'}
+        <span className="legend-item legend-item-missed" title={`${windowMissed} ${t.missed || 'ngày bị lỡ'}`}>
+          <span className="legend-icon missed" aria-hidden="true">✕</span>
+          <span className="legend-label">{t.missed || 'Bị lỡ'}</span>
+          <span className="legend-count">({windowMissed})</span>
         </span>
       </div>
     </section>
