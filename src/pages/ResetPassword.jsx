@@ -15,7 +15,7 @@ export default function ResetPassword({ onReset, t }) {
     if (password !== confirmPassword) return setError(t.formErrors.confirm)
     onReset(resetUserId, password)
     sessionStorage.removeItem('resetUserId')
-    navigate('/login')
+    navigate('/login', { state: { resetSuccess: true } })
   }
 
   return (

@@ -42,7 +42,7 @@ export default function StreakCalendar({
           const hasTodos = todoDays.has(day)
           const isToday = day === today
           const isSelected = selectedDate === day
-          const isClickable = onSelectDay ? (hasTodos || isToday || isMissed) : true
+          const isClickable = true
 
           let statusClass = ''
           let badge = null

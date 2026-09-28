@@ -43,6 +43,8 @@ export default {
   continue: 'Tiếp tục',
   verify: 'Xác minh',
   resetPassword: 'Đặt lại mật khẩu',
+  demoSecurityQuestion: 'Tên thương hiệu của ứng dụng này là gì?',
+  passwordResetSuccess: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
   savePassword: 'Lưu mật khẩu',
   settingsTitle: 'Cài đặt',
   settingsHeading: 'Biến ứng dụng thành của bạn.',

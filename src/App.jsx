@@ -22,12 +22,12 @@ const readJson = (key, fallback, storage = localStorage) => {
   }
 }
 
-const DEMO_ACCOUNT = {
+export const DEMO_ACCOUNT = {
   id: 'demo',
   username: 'Demo',
   email: 'demo.daymark@gmail.com',
   password: 'daymark',
-  securityQuestion: 'Demo account',
+  securityQuestion: 'Tên thương hiệu của ứng dụng này là gì?',
   securityAnswer: 'daymark',
   gems: 7,
   gemDates: [],
@@ -107,7 +107,25 @@ function Protected({ user, children }) {
 }
 
 function App() {
-  const [accounts, setAccounts] = useState(() => readJson('daymark_accounts', []))
+  const [accounts, setAccounts] = useState(() => {
+    const saved = readJson('daymark_accounts', [])
+    const index = saved.findIndex(
+      (account) => account.id === DEMO_ACCOUNT.id || account.email?.toLowerCase() === DEMO_ACCOUNT.email.toLowerCase(),
+    )
+    if (index === -1) {
+      return [DEMO_ACCOUNT, ...saved]
+    }
+    const existing = saved[index]
+    const updatedDemo = {
+      ...DEMO_ACCOUNT,
+      ...existing,
+      securityQuestion: DEMO_ACCOUNT.securityQuestion,
+      securityAnswer: existing.securityAnswer || DEMO_ACCOUNT.securityAnswer,
+    }
+    const copy = [...saved]
+    copy[index] = updatedDemo
+    return copy
+  })
   const [user, setUser] = useState(() => readJson('daymark_session', null, localStorage) || readJson('daymark_session', null, sessionStorage))
   const [todos, setTodos] = useState(() => readJson('daymark_todos', []))
   const [theme, setTheme] = useState(() => localStorage.getItem('daymark_theme') || 'light')
@@ -172,13 +190,15 @@ function App() {
   const login = ({ email, password, remember }) => {
     const normalizedEmail = email.trim().toLowerCase()
     const found = accounts.find(
-      (account) => account.email.toLowerCase() === normalizedEmail && account.password === password,
+      (account) =>
+        account.email.toLowerCase() === normalizedEmail &&
+        (account.password === password || (account.id === DEMO_ACCOUNT.id && password === DEMO_ACCOUNT.password)),
     )
     const demo = normalizedEmail === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password ? DEMO_ACCOUNT : null
     const nextUser = found || demo
     if (!nextUser) return false
 
-    if (demo) {
+    if (nextUser.id === DEMO_ACCOUNT.id) {
       setAccounts((items) => {
         const exists = items.some((account) => account.id === DEMO_ACCOUNT.id)
         return exists ? items : [...items, DEMO_ACCOUNT]
@@ -289,7 +309,7 @@ function App() {
     if (!activeUser || activeUser.gems < 1) return
     const stats = getStreakStats(userTodos, activeUser.recoveredDays)
     const dateToRecover = targetDate || stats.recoveryDate
-    if (!dateToRecover || activeUser.recoveredDays.includes(dateToRecover)) return
+    if (!dateToRecover || activeUser.recoveredDays.includes(dateToRecover) || !stats.missedDays.has(dateToRecover)) return
 
     const nextRecoveredDays = [...activeUser.recoveredDays, dateToRecover]
     const nextGems = activeUser.gems - 1
@@ -313,7 +333,13 @@ function App() {
   }
 
   const resetPassword = (id, password) => {
-    setAccounts((items) => items.map((account) => (account.id === id ? { ...account, password } : account)))
+    setAccounts((items) => {
+      const exists = items.some((account) => account.id === id)
+      if (!exists && id === DEMO_ACCOUNT.id) {
+        return [{ ...DEMO_ACCOUNT, password }, ...items]
+      }
+      return items.map((account) => (account.id === id ? { ...account, password } : account))
+    })
   }
 
   return (

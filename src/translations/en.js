@@ -43,6 +43,8 @@ export default {
   continue: 'Continue',
   verify: 'Verify',
   resetPassword: 'Reset password',
+  demoSecurityQuestion: 'What is the brand name of this app?',
+  passwordResetSuccess: 'Password reset successfully! Please sign in with your new password.',
   savePassword: 'Save password',
   settingsTitle: 'Settings',
   settingsHeading: 'Make it feel like yours.',

@@ -43,29 +43,15 @@ export const getCompletedDays = (todos, recoveredDays = []) => {
 export const getMissedDays = (todos, recoveredDays = []) => {
   const grouped = getTodoDayMap(todos)
   const recoveredSet = new Set(recoveredDays)
-  const fullyCompleted = getFullyCompletedDays(todos)
-  const allStreakDays = new Set([...fullyCompleted, ...recoveredSet])
   const today = dateKey()
   const missedDays = new Set()
 
-  // 1. Past days with recorded todos where not all todos were completed
+  // Only past days with recorded todos where not all todos were completed
   Object.entries(grouped).forEach(([date, value]) => {
     if (date < today && !recoveredSet.has(date) && value.total > 0 && value.total !== value.completed) {
       missedDays.add(date)
     }
   })
-
-  // 2. Past gap days in the 28-day window that broke an ongoing streak
-  for (let offset = -28; offset < 0; offset++) {
-    const day = addDays(today, offset)
-    if (!allStreakDays.has(day) && !recoveredSet.has(day)) {
-      const prev = addDays(day, -1)
-      const next = addDays(day, 1)
-      if (allStreakDays.has(prev) || allStreakDays.has(next)) {
-        missedDays.add(day)
-      }
-    }
-  }
 
   return missedDays
 }
@@ -172,16 +158,31 @@ export const getStreakStats = (todos, recoveredDays = []) => {
     if (latestStreakDay) {
       isStreakLost = true
       const breakDay = addDays(latestStreakDay, 1)
-      if (breakDay <= yesterday && (missedDays.has(breakDay) || !allStreakDays.has(breakDay))) {
+      if (breakDay <= yesterday && missedDays.has(breakDay)) {
         recoveryDate = breakDay
-      } else if (missedDays.has(yesterday) || !allStreakDays.has(yesterday)) {
+      } else if (missedDays.has(yesterday)) {
         recoveryDate = yesterday
+      } else {
+        const sortedMissed = [...missedDays].filter((d) => d <= yesterday).sort()
+        if (sortedMissed.length > 0) {
+          recoveryDate = sortedMissed[sortedMissed.length - 1]
+        }
+      }
+    } else {
+      const sortedMissed = [...missedDays].filter((d) => d <= yesterday).sort()
+      if (sortedMissed.length > 0) {
+        recoveryDate = sortedMissed[sortedMissed.length - 1]
       }
     }
   } else if (startOfCurrentStreak) {
     const dayBeforeStreak = addDays(startOfCurrentStreak, -1)
-    if (missedDays.has(dayBeforeStreak) || (allStreakDays.has(addDays(dayBeforeStreak, -1)) && !allStreakDays.has(dayBeforeStreak))) {
+    if (missedDays.has(dayBeforeStreak)) {
       recoveryDate = dayBeforeStreak
+    } else {
+      const sortedMissed = [...missedDays].filter((d) => d < startOfCurrentStreak).sort()
+      if (sortedMissed.length > 0) {
+        recoveryDate = sortedMissed[sortedMissed.length - 1]
+      }
     }
   }
 
