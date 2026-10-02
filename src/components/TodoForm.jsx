@@ -29,16 +29,15 @@ export default function TodoForm({ onAdd, selectedDate, onGoToToday, t }) {
   return (
     <form className={`todo-form ${!isToday ? 'is-past-date' : ''}`} onSubmit={submit}>
       <label>
-        <span>{t.taskPlaceholder}</span>
         <input
           value={title}
           disabled={!isToday}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder={isToday ? t.taskPlaceholder : (t.onlyTodayNotice || 'Chỉ có thể thêm việc cho ngày hôm nay')}
+          placeholder={isToday ? t.taskPlaceholder : (t.onlyTodayNotice || 'Không thể thêm việc')}
+          aria-label={t.taskPlaceholder}
         />
       </label>
       <div className="date-display">
-        <span className="date-display-label">{t.date}</span>
         <span className="date-display-value">
           📅 {formattedDate} {isToday ? `(${t.today || 'Hôm nay'})` : ''}
         </span>
@@ -50,12 +49,12 @@ export default function TodoForm({ onAdd, selectedDate, onGoToToday, t }) {
           </button>
         ) : (
           <button
-            className="secondary-button go-today-button"
+            className="primary-button"
             type="button"
             onClick={onGoToToday}
             title={t.goToToday || 'Về ngày hôm nay để thêm việc'}
           >
-            👉 {t.goToToday || 'Về hôm nay'}
+            {t.goToToday || 'Về hôm nay'}
           </button>
         )}
       </div>

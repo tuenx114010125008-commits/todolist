@@ -75,7 +75,7 @@ export default {
   streakRecovered: 'Đã khôi phục streak cho ngày {date}!',
   clickToRecover: 'Nhấn để khôi phục (1 Gem)',
   selectFromCalendarHint: 'Chỉ có thể chọn ngày từ lịch ở bên trái',
-  onlyTodayNotice: 'Chỉ có thể thêm việc cho ngày hôm nay',
+  onlyTodayNotice: 'Không thể thêm việc',
   goToToday: 'Về hôm nay',
   cannotAddPastDate: 'Không thể thêm việc cho những ngày đã qua. Hãy chọn ngày hôm nay để thêm việc mới.',
   cannotModifyPastDate: 'Không thể tích hoàn thành, sửa hoặc xóa công việc của những ngày đã qua.',

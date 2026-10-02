@@ -8,7 +8,6 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Statistics from './pages/Statistics'
 import Settings from './pages/Settings'
-import TodoDetail from './pages/TodoDetail'
 import en from './translations/en'
 import vi from './translations/vi'
 import { addDays, dateKey, evaluateGemRewards, getStreakStats } from './utils/streak'
@@ -396,10 +395,6 @@ function App() {
                       t={t}
                     />
                   }
-                />
-                <Route
-                  path="/todo/:id"
-                  element={<TodoDetail todos={userTodos} onToggle={toggleTodo} onDelete={deleteTodo} onEdit={editTodo} t={t} />}
                 />
               </Routes>
             </Protected>

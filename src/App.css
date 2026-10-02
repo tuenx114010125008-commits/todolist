@@ -294,17 +294,13 @@ h2 {
 
 .todo-form {
   grid-template-columns: 1fr auto auto;
-  align-items: end;
+  align-items: center;
   margin-bottom: 16px;
 }
 
 .todo-form label {
   grid-column: 1;
-  display: grid;
-  gap: 6px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text);
+  display: block;
 }
 
 .date-label {
@@ -567,10 +563,7 @@ h2 {
 /* ── Date display (read-only) ── */
 .date-display {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.88rem;
-  font-weight: 700;
+  align-items: center;
 }
 
 .date-display-label {
@@ -580,7 +573,7 @@ h2 {
 }
 
 .date-display-value {
-  padding: 10px 13px;
+  padding: 12px 13px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-strong);
@@ -588,6 +581,9 @@ h2 {
   font-weight: 600;
   font-size: 0.88rem;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .text-button {
