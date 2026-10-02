@@ -21,23 +21,29 @@ const readJson = (key, fallback, storage = localStorage) => {
   }
 }
 
-export const DEMO_ACCOUNT = {
-  id: 'demo',
-  username: 'Demo',
-  email: 'demo.daymark@gmail.com',
-  password: 'daymark',
-  securityQuestion: 'Tên thương hiệu của ứng dụng này là gì?',
-  securityAnswer: 'daymark',
-  gems: 7,
-  gemDates: [],
-  recoveredDays: ['2026-09-23', '2026-09-24'],
-  awardedCycles: [],
+export const createDemoAccount = () => {
+  const today = dateKey()
+  return {
+    id: 'demo',
+    username: 'Demo',
+    email: 'demo.daymark@gmail.com',
+    password: 'daymark',
+    securityQuestion: 'Tên thương hiệu của ứng dụng này là gì?',
+    securityAnswer: 'daymark',
+    gems: 7,
+    gemDates: [],
+    recoveredDays: [addDays(today, -5), addDays(today, -4)],
+    awardedCycles: [],
+  }
 }
 
-const DEMO_SEED_VERSION = 'v5_streak_fix'
+export const DEMO_ACCOUNT = createDemoAccount()
+
+const DEMO_SEED_VERSION = 'v8_perfect_relative_streak'
 
 const createDemoTodos = () => {
   const today = dateKey()
+  const d = (offset) => addDays(today, -offset)
   const todo = (idSuffix, date, title, completed) => ({
     id: `demo-${date}-${idSuffix}`,
     userId: DEMO_ACCOUNT.id,
@@ -46,59 +52,61 @@ const createDemoTodos = () => {
     completed,
   })
 
-  const items = [
-    // Day 10 (2026-09-10: Completed 🔥)
-    todo('1', '2026-09-10', 'Setup project repository', true),
-    todo('2', '2026-09-10', 'Review wireframe designs', true),
+  return [
+    // Today (d0)
+    todo('1', d(0), 'Xem lại danh sách mục tiêu trong ngày', false),
+    todo('2', d(0), 'Đọc tài liệu chuyên ngành 20 phút', false),
 
-    // Day 11 (2026-09-11: Missed ✕ - has incomplete task)
-    todo('1', '2026-09-11', 'Setup design system tokens', true),
-    todo('2', '2026-09-11', 'Prepare sprint backlog', false),
-    todo('3', '2026-09-11', 'Client feedback review', false),
+    // d1 (Yesterday: Completed 🔥)
+    todo('1', d(1), 'Thiết kế giao diện component Todo', true),
+    todo('2', d(1), 'Kiểm tra độ tương phản màu sắc', true),
 
-    // Day 12 (2026-09-12: Completed 🔥)
-    todo('1', '2026-09-12', 'Update typography scale', true),
-    todo('2', '2026-09-12', 'Design color palette tokens', true),
+    // d2 (Completed 🔥)
+    todo('1', d(2), 'Đồng bộ hệ thống Design Tokens', true),
+    todo('2', d(2), 'Viết hướng dẫn sử dụng tính năng', true),
 
-    // Day 13 (2026-09-13: Missed ✕ - has incomplete task)
-    todo('1', '2026-09-13', 'Weekly architecture sync', true),
-    todo('2', '2026-09-13', 'Update API documentation', false),
+    // d3 (Completed 🔥)
+    todo('1', d(3), 'Tối ưu hiệu năng ứng dụng React', true),
+    todo('2', d(3), 'Kiểm thử luồng khôi phục mật khẩu', true),
 
-    // Day 20 (2026-09-20: Missed ✕ - has incomplete task)
-    todo('1', '2026-09-20', 'Archive old project assets', false),
-    todo('2', '2026-09-20', 'Review team pull requests', false),
+    // Note: d4 and d5 are in DEMO_ACCOUNT.recoveredDays (💎) -> together with d3, d2, d1, this forms an active 5-day streak!
 
-    // Day 21 (2026-09-21: Missed ✕ - has incomplete task so recovering Day 22 gives streak = 6)
-    todo('1', '2026-09-21', 'Organize the workspace', true),
-    todo('2', '2026-09-21', 'Clean up project dependencies', false),
+    // d6 (Missed ✕ - has incomplete task -> Bridge day to recover!)
+    todo('1', d(6), 'Họp định hướng sản phẩm cùng nhóm', true),
+    todo('2', d(6), 'Cập nhật backlog sprint tiếp theo', false),
 
-    // Day 22 (2026-09-22: Missed ✕ - has incomplete task)
-    todo('1', '2026-09-22', 'Weekly backup check', true),
-    todo('2', '2026-09-22', 'Draft design presentation', false),
-    todo('3', '2026-09-22', 'Send follow-up emails', false),
+    // d7 (Completed 🔥)
+    todo('1', d(7), 'Đánh giá pull request của thành viên', true),
+    todo('2', d(7), 'Cập nhật tài liệu kỹ thuật', true),
 
-    // Day 25 (2026-09-25: Completed 🔥)
-    todo('1', '2026-09-25', 'Take a short walk', true),
-    todo('2', '2026-09-25', 'Write code documentation', true),
+    // d8 (Completed 🔥)
+    todo('1', d(8), 'Khởi tạo cấu trúc dự án Vite + React', true),
+    todo('2', d(8), 'Thiết lập cấu hình ESLint và Oxlint', true),
 
-    // Day 26 (2026-09-26: Completed 🔥)
-    todo('1', '2026-09-26', 'Plan tomorrow goals', true),
-    todo('2', '2026-09-26', 'Review pull requests', true),
+    // d9 (Missed ✕)
+    todo('1', d(9), 'Dọn dẹp các thư viện không sử dụng', true),
+    todo('2', d(9), 'Kiểm tra sao lưu cơ sở dữ liệu', false),
 
-    // Day 27 (2026-09-27: Completed 🔥)
-    todo('1', '2026-09-27', 'Review today\'s priorities', true),
-    todo('2', '2026-09-27', 'Read for 20 minutes', true),
+    // d13 (Missed ✕)
+    todo('1', d(13), 'Lập dàn ý thiết kế chức năng Streak', false),
+    todo('2', d(13), 'Thu thập phản hồi từ người dùng', true),
+
+    // d14 (Completed 🔥)
+    todo('1', d(14), 'Xây dựng layout Streak Card', true),
+    todo('2', d(14), 'Tích hợp bộ màu Dark/Light mode', true),
+
+    // d15 (Completed 🔥)
+    todo('1', d(15), 'Nghiên cứu thư viện React Router', true),
+    todo('2', d(15), 'Xây dựng sơ đồ luồng điều hướng', true),
+
+    // d18 (Completed 🔥)
+    todo('1', d(18), 'Đọc sách chuyên môn 30 phút', true),
+    todo('2', d(18), 'Đi bộ thư giãn buổi chiều', true),
+
+    // d19 (Missed ✕)
+    todo('1', d(19), 'Gửi email tổng kết tiến độ', false),
+    todo('2', d(19), 'Sắp xếp lại thư mục làm việc', true),
   ]
-
-  // If today is beyond 2026-09-27, also seed today with active tasks
-  if (today > '2026-09-27') {
-    items.push(
-      todo('1', today, 'Review today\'s priorities', false),
-      todo('2', today, 'Read for 20 minutes', false),
-    )
-  }
-
-  return items
 }
 
 function Protected({ user, children }) {
@@ -165,17 +173,21 @@ function App() {
     storage.setItem('daymark_session', JSON.stringify(activeUser))
   }, [activeUser])
 
-  // One-time versioned seed migration for demo account: guarantees proper todos for Days 10, 11, 12, 13, 20, 21, 22, 25, 26, 27
-  // and allows user to delete any todo without it being resurrected!
+  // One-time versioned seed migration for demo account: dynamically seeds relative to current date
   useEffect(() => {
     if (activeUser?.id === DEMO_ACCOUNT.id) {
       const currentVersion = localStorage.getItem('daymark_demo_version')
       if (currentVersion !== DEMO_SEED_VERSION) {
+        const freshDemo = createDemoAccount()
         const seeded = createDemoTodos()
         setTodos((prevTodos) => {
           const nonDemoTodos = prevTodos.filter((todo) => todo.userId !== DEMO_ACCOUNT.id)
           return [...nonDemoTodos, ...seeded]
         })
+        setAccounts((prevAccounts) =>
+          prevAccounts.map((acc) => (acc.id === DEMO_ACCOUNT.id ? { ...acc, ...freshDemo } : acc)),
+        )
+        syncAccount(freshDemo)
         localStorage.setItem('daymark_demo_version', DEMO_SEED_VERSION)
       }
     }
@@ -194,13 +206,14 @@ function App() {
         (account.password === password || (account.id === DEMO_ACCOUNT.id && password === DEMO_ACCOUNT.password)),
     )
     const demo = normalizedEmail === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password ? DEMO_ACCOUNT : null
-    const nextUser = found || demo
+    let nextUser = found || demo
     if (!nextUser) return false
 
     if (nextUser.id === DEMO_ACCOUNT.id) {
+      const freshDemo = createDemoAccount()
       setAccounts((items) => {
         const exists = items.some((account) => account.id === DEMO_ACCOUNT.id)
-        return exists ? items : [...items, DEMO_ACCOUNT]
+        return exists ? items.map((a) => (a.id === DEMO_ACCOUNT.id ? { ...a, ...freshDemo } : a)) : [...items, freshDemo]
       })
       if (localStorage.getItem('daymark_demo_version') !== DEMO_SEED_VERSION) {
         const seeded = createDemoTodos()
@@ -210,6 +223,7 @@ function App() {
         })
         localStorage.setItem('daymark_demo_version', DEMO_SEED_VERSION)
       }
+      nextUser = { ...nextUser, ...freshDemo }
     }
 
     localStorage.removeItem('daymark_session')
