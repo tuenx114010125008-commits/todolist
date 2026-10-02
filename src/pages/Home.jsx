@@ -97,6 +97,31 @@ export default function Home({ user, todos, onAdd, onToggle, onDelete, onEdit, o
               onGoToToday={() => setSelectedDate(dateKey())}
               t={t}
             />
+            {isPastDate && !stats.allStreakDays.has(selectedDate) && (
+              <div className="day-recovery-banner">
+                <div className="recovery-banner-info">
+                  <span className="recovery-banner-badge" aria-hidden="true">✕</span>
+                  <span>{selectedDate}: {t.missed || 'Bị lỡ chuỗi'}</span>
+                </div>
+                <button
+                  type="button"
+                  className="recover-button"
+                  disabled={gems < 1}
+                  onClick={() => onRecover(selectedDate)}
+                  title={gems < 1 ? t.needMoreGems : ''}
+                >
+                  💎 {t.recover || 'Khôi phục streak (1 Gem)'}
+                </button>
+              </div>
+            )}
+            {isPastDate && stats.recoveredDays.has(selectedDate) && (
+              <div className="day-recovery-banner is-recovered">
+                <div className="recovery-banner-info">
+                  <span className="recovery-banner-badge" aria-hidden="true">💎</span>
+                  <span>{selectedDate}: {t.recovered || 'Đã khôi phục bằng Gem'}</span>
+                </div>
+              </div>
+            )}
             <TodoList
               todos={visible}
               onToggle={onToggle}

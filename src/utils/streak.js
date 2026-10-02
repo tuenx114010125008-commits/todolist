@@ -121,69 +121,87 @@ export const getStreakStats = (todos, recoveredDays = []) => {
   const today = dateKey()
   const yesterday = addDays(today, -1)
 
-  // Longest streak
-  let longestStreak = 0
-  let run = 0
-  let previous = null
+  // Find all consecutive streak runs
+  const runs = []
+  let currentRun = []
 
   sortedDates.forEach((date) => {
-    run = previous && dayDistance(previous, date) === 1 ? run + 1 : 1
-    longestStreak = Math.max(longestStreak, run)
-    previous = date
+    if (currentRun.length === 0) {
+      currentRun.push(date)
+    } else {
+      const prev = currentRun[currentRun.length - 1]
+      if (dayDistance(prev, date) === 1) {
+        currentRun.push(date)
+      } else {
+        runs.push(currentRun)
+        currentRun = [date]
+      }
+    }
+  })
+  if (currentRun.length > 0) {
+    runs.push(currentRun)
+  }
+
+  // Longest streak
+  let longestStreak = 0
+  runs.forEach((r) => {
+    longestStreak = Math.max(longestStreak, r.length)
   })
 
-  // Current streak
-  const anchor = allStreakDays.has(today) ? today : allStreakDays.has(yesterday) ? yesterday : null
+  // Current streak calculation:
+  // 1. If a run contains today, that's active.
+  // 2. Else if a run contains yesterday, that's active.
+  // 3. Otherwise, use the latest streak run in history (allowing continuous recovery).
   let currentStreak = 0
-  let startOfCurrentStreak = anchor
+  let activeRun = null
 
-  if (anchor) {
-    let cursor = anchor
-    while (allStreakDays.has(cursor)) {
-      currentStreak += 1
-      startOfCurrentStreak = cursor
-      cursor = addDays(cursor, -1)
+  if (runs.length > 0) {
+    const todayRun = runs.find((r) => r.includes(today))
+    const yesterdayRun = runs.find((r) => r.includes(yesterday))
+
+    if (todayRun) {
+      activeRun = todayRun
+    } else if (yesterdayRun) {
+      activeRun = yesterdayRun
+    } else {
+      activeRun = runs[runs.length - 1]
     }
+    currentStreak = activeRun.length
   }
 
   // Gem progress: progress towards next 7-day milestone
   const gemProgress = currentStreak % 7
 
-  // Identify recovery date (only when streak is actually lost or broken)
-  let isStreakLost = false
+  // Identify candidate recovery date:
+  // First priority: Extend active run backward (e.g. Day 22 before Day 23)
+  // Second priority: Extend active run forward (e.g. Day 28 after Day 27)
+  // Third priority: Most recent missed day
   let recoveryDate = null
+  let isStreakLost = false
 
-  if (currentStreak === 0) {
-    const latestStreakDay = sortedDates.at(-1) || null
-    if (latestStreakDay) {
-      isStreakLost = true
-      const breakDay = addDays(latestStreakDay, 1)
-      if (breakDay <= yesterday && missedDays.has(breakDay)) {
-        recoveryDate = breakDay
-      } else if (missedDays.has(yesterday)) {
-        recoveryDate = yesterday
-      } else {
-        const sortedMissed = [...missedDays].filter((d) => d <= yesterday).sort()
-        if (sortedMissed.length > 0) {
-          recoveryDate = sortedMissed[sortedMissed.length - 1]
-        }
-      }
+  if (activeRun && activeRun.length > 0) {
+    const dayBefore = addDays(activeRun[0], -1)
+    const dayAfter = addDays(activeRun[activeRun.length - 1], 1)
+
+    if (dayBefore && !allStreakDays.has(dayBefore) && (missedDays.has(dayBefore) || dayBefore < today)) {
+      recoveryDate = dayBefore
+    } else if (dayAfter && dayAfter <= today && !allStreakDays.has(dayAfter)) {
+      recoveryDate = dayAfter
     } else {
-      const sortedMissed = [...missedDays].filter((d) => d <= yesterday).sort()
+      const sortedMissed = [...missedDays].filter((d) => d <= today && !allStreakDays.has(d)).sort()
       if (sortedMissed.length > 0) {
         recoveryDate = sortedMissed[sortedMissed.length - 1]
       }
     }
-  } else if (startOfCurrentStreak) {
-    const dayBeforeStreak = addDays(startOfCurrentStreak, -1)
-    if (missedDays.has(dayBeforeStreak)) {
-      recoveryDate = dayBeforeStreak
-    } else {
-      const sortedMissed = [...missedDays].filter((d) => d < startOfCurrentStreak).sort()
-      if (sortedMissed.length > 0) {
-        recoveryDate = sortedMissed[sortedMissed.length - 1]
-      }
+  } else {
+    const sortedMissed = [...missedDays].filter((d) => d <= today && !allStreakDays.has(d)).sort()
+    if (sortedMissed.length > 0) {
+      recoveryDate = sortedMissed[sortedMissed.length - 1]
     }
+  }
+
+  if (activeRun && !activeRun.includes(today) && !activeRun.includes(yesterday)) {
+    isStreakLost = true
   }
 
   return {

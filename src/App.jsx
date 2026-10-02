@@ -308,7 +308,7 @@ function App() {
     if (!activeUser || activeUser.gems < 1) return
     const stats = getStreakStats(userTodos, activeUser.recoveredDays)
     const dateToRecover = targetDate || stats.recoveryDate
-    if (!dateToRecover || activeUser.recoveredDays.includes(dateToRecover) || !stats.missedDays.has(dateToRecover)) return
+    if (!dateToRecover || activeUser.recoveredDays.includes(dateToRecover)) return
 
     const nextRecoveredDays = [...activeUser.recoveredDays, dateToRecover]
     const nextGems = activeUser.gems - 1

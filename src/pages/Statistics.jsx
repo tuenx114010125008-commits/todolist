@@ -15,7 +15,7 @@ export default function Statistics({ todos, gems, recoveredDays, onRecover, t })
     [t.gems, `💎 ${gems}`],
   ]
 
-  const todoDays = new Set(todos.map((todo) => todo.dueDate).filter(Boolean))
+  const todoDays = new Set(todos.map((todo) => todo.date).filter(Boolean))
 
   return (
     <main className="page-shell statistics-page">
