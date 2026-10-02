@@ -97,7 +97,7 @@ export default function Home({ user, todos, onAdd, onToggle, onDelete, onEdit, o
               onGoToToday={() => setSelectedDate(dateKey())}
               t={t}
             />
-            {isPastDate && !stats.allStreakDays.has(selectedDate) && (
+            {isPastDate && stats.missedDays.has(selectedDate) && (
               <div className="day-recovery-banner">
                 <div className="recovery-banner-info">
                   <span className="recovery-banner-badge" aria-hidden="true">✕</span>

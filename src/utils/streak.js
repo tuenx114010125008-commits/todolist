@@ -172,9 +172,9 @@ export const getStreakStats = (todos, recoveredDays = []) => {
   // Gem progress: progress towards next 7-day milestone
   const gemProgress = currentStreak % 7
 
-  // Identify candidate recovery date:
-  // First priority: Extend active run backward (e.g. Day 22 before Day 23)
-  // Second priority: Extend active run forward (e.g. Day 28 after Day 27)
+  // Identify candidate recovery date (ONLY from days that had tasks and were missed):
+  // First priority: Extend active run backward (e.g. Day before start of run if it was missed)
+  // Second priority: Extend active run forward (e.g. Day after end of run if it was missed)
   // Third priority: Most recent missed day
   let recoveryDate = null
   let isStreakLost = false
@@ -183,18 +183,18 @@ export const getStreakStats = (todos, recoveredDays = []) => {
     const dayBefore = addDays(activeRun[0], -1)
     const dayAfter = addDays(activeRun[activeRun.length - 1], 1)
 
-    if (dayBefore && !allStreakDays.has(dayBefore) && (missedDays.has(dayBefore) || dayBefore < today)) {
+    if (dayBefore && missedDays.has(dayBefore)) {
       recoveryDate = dayBefore
-    } else if (dayAfter && dayAfter <= today && !allStreakDays.has(dayAfter)) {
+    } else if (dayAfter && missedDays.has(dayAfter)) {
       recoveryDate = dayAfter
     } else {
-      const sortedMissed = [...missedDays].filter((d) => d <= today && !allStreakDays.has(d)).sort()
+      const sortedMissed = [...missedDays].sort()
       if (sortedMissed.length > 0) {
         recoveryDate = sortedMissed[sortedMissed.length - 1]
       }
     }
   } else {
-    const sortedMissed = [...missedDays].filter((d) => d <= today && !allStreakDays.has(d)).sort()
+    const sortedMissed = [...missedDays].sort()
     if (sortedMissed.length > 0) {
       recoveryDate = sortedMissed[sortedMissed.length - 1]
     }
